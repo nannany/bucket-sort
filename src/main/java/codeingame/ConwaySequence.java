@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 //CodingameのConwaySequenceの解法
 public class ConwaySequence {
@@ -21,9 +22,7 @@ public class ConwaySequence {
 	    // 数列表示
 	    for (int j = 1; j < L + 1; j++) {
 		ArrayList<Integer> list = conwaySeq(R, j);
-		for (Integer num : list) {
-		    System.out.print(num + " ");
-		}
+		System.out.println(list.stream().map(i -> i.toString()).collect(Collectors.joining(" ")));
 		System.out.println();
 	    }
 	} catch (IOException e) {
