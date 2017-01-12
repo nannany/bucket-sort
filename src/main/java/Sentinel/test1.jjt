@@ -1,0 +1,106 @@
+/** オプション */
+options {
+    STATIC=false;
+    JAVA_UNICODE_ESCAPE=false;
+    UNICODE_INPUT=true;
+    DEBUG_PARSER=false;
+    DEBUG_TOKEN_MANAGER=false;
+}
+
+/** Parserクラスの定義 */
+PARSER_BEGIN(MyParser)
+package test;
+import expressions.ExecPgm;
+public class MyParser {
+    public static void main(String args[]) throws ParseException {
+      MyParser parser = new MyParser(System.in);
+      ExecPgm ep = parser.ExecPgm();
+      System.out.println(ep.getStepName() + ":" + ep.getExecPgmName());
+    }
+}
+PARSER_END(MyParser)
+/** ここまでがParserクラスの定義 */
+/** 以下は文法の定義 */
+
+/** 無視する文字を定義 */
+SKIP:
+{
+    <WHITESPACE: " " | "\r" | "\t" | "\n">
+ |  <SLASH: "//">
+ |  <NUMBERS: "00" (["0"-"9"]){4} "00">
+}
+
+/** コメントアウト行定義 */
+SPECIAL_TOKEN:
+{
+   < LINE_COMMENT: "//*"(~["\r","\n"])*>
+}
+
+/** 出現するトークンを定義 */
+TOKEN:
+{
+        <DD:"DD">
+ |      <EXEC:"EXEC">
+ |      <DSN:"DSN">
+// |      <STEP:"//STEP"(["0"-"9","a"-"z","A"-"Z"])*>
+// |      <HENSU:"//"(["0"-"9","a"-"z","A"-"Z"])*>
+ |      <SPACE:" "(" ")*>
+ |      <IDENTIFIER: (["0"-"9","a"-"z","A"-"Z"](["0"-"9","a"-"z","A"-"Z","."])*)>
+}
+
+//void Input():
+//{
+//    /* ここで使う変数を宣言 */
+//    String execPgm = "";
+//    String Dd = "";
+//    String hensu = "";
+//    Token token = null;
+//}
+//{
+//    <STEP><SPACE><EXECPGM>"="
+//    token = <IDENTIFIER>{
+//        execPgm = token.image;
+//        System.out.println(execPgm);
+//    }
+//}
+
+ExecPgm ExecPgm() #ExecPgm:
+{
+  ExecPgm result = new ExecPgm();
+  List<Equity> equities = new ArrayList<Equity>();
+  Equity equity = null;
+  Token stepName = null;
+}
+{
+  stepName = <IDENTIFIER>
+  <SPACE><EXEC><SPACE>
+  equity = Equity() {
+    equities.add(equity);
+  }
+  ("," equity = Equity() {
+    equities.add(equity);
+  })*
+
+  {
+    result.setStepName(stepName.image);
+    result.setEquities(equities);
+    return result;
+  }
+}
+
+Equity Equity():
+{
+  Equity equity = new Equity();
+  Token leftExpression = null;
+  Token rightExpression = null;
+}
+{
+  leftExpression = <IDENTIFIER>
+  "="
+  rightExpression = <IDENTIFIER>
+  {
+    equity.setLeftExpression(leftExpression.image);
+    equity.setRightExpression(rightExpression.image);
+    return equity;
+  }
+}
